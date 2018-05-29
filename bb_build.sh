@@ -14,7 +14,7 @@
 
 # Init Script
 KERNEL_DIR=$PWD
-ZIMAGE=$KERNEL_DIR/arch/arm/boot/zImage
+ZIMAGE=$KERNEL_DIR/arch/arm64/boot/zImage
 KERNEL="Image.gz-dtb"
 KERN_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb
 BASE_VER="BlackBox"
