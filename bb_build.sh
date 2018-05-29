@@ -14,7 +14,6 @@
 
 # Init Script
 KERNEL_DIR=$PWD
-ZIMAGE=$KERNEL_DIR/arch/arm/boot/zImage
 KERNEL="Image.gz-dtb"
 KERN_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb
 BASE_VER="BlackBox"
@@ -38,6 +37,8 @@ export SUBARCH=arm64
 export KBUILD_BUILD_USER="KunalKene1797"
 export KBUILD_BUILD_HOST="PhantomBlack"
 export CROSS_COMPILE="/root/aarch64-linux-android-4.9/bin/aarch64-linux-android-"
+export KBUILD_COMPILER_STRING=$(/root/platform_prebuilts_clang_host_linux-x86/clang-4053586/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
+
 
 # Compilation Scripts Are Below
 echo -e "${green}"
@@ -68,7 +69,9 @@ echo -e "$yellow***********************************************"
 echo "          Cooking BlackBox        "
 echo -e "***********************************************$nocol"
 
-make -j$(nproc --all) O=out ARCH=arm64
+make -j$(nproc --all) O=out ARCH=arm64 \
+					  CC="/root/platform_prebuilts_clang_host_linux-x86/clang-4053586/bin/clang" \
+                      CLANG_TRIPLE="aarch64-linux-gnu-"
 
 if ! [ -a $ZIMAGE ];
 then
