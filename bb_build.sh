@@ -16,9 +16,16 @@
 KERNEL_DIR=$PWD
 KERNEL="Image.gz-dtb"
 KERN_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb
+BUILD_START=$(date +"%s")
+ANYKERNEL_DIR=/root/AnyKernel2
+EXPORT=yes
+EXPORT_DIR=/root/flashablezips
+
+# Make Changes to this before release
+ZIP_NAME="BlackBox-1.0"
 BASE_VER="BlackBox"
 VER="-v1.0-$(date +"%Y-%m-%d"-%H%M)-"
-BUILD_START=$(date +"%s")
+
 
 # Color Code Script
 Black='\e[0;30m'        # Black
@@ -73,14 +80,49 @@ make -j$(nproc --all) O=out ARCH=arm64 \
 					  CC="/root/platform_prebuilts_clang_host_linux-x86/clang-4053586/bin/clang" \
                       CLANG_TRIPLE="aarch64-linux-gnu-"
 
-if ! [ -a $ZIMAGE ];
-then
-echo -e "$Red Kernel Compilation failed! Fix the errors! $nocol"
-exit 1
+# If the above was successful
+if [[ `ls ${ZIMAGE_DIR}/${KERNEL} 2>/dev/null | wc -l` != "0" ]]; then
+   BUILD_RESULT_STRING="BUILD SUCCESSFUL"
+
+
+   # Make the zip file
+   newLine; echoText "MAKING FLASHABLE ZIP"; newLine
+
+   cp -vr ${ZIMAGE_DIR}/${KERNEL} ${ANYKERNEL_DIR}/zImage
+   cd ${ANYKERNEL_DIR}
+   zip -r9 ${ZIP_NAME}.zip * -x README ${ZIP_NAME}.zip
+
+else
+   BUILD_RESULT_STRING="BUILD FAILED"
 fi
 
+NOW=$(date +"%m-%d")
+ZIP_LOCATION=${ANYKERNEL_DIR}/${ZIP_NAME}.zip
+ZIP_EXPORT=${EXPORT_DIR}/${NOW}
+ZIP_EXPORT_LOCATION=${EXPORT_DIR}/${NOW}/${ZIP_NAME}.zip
 
-#BUILD TIME
-BUILD_END=$(date +"%s")
-DIFF=$(($BUILD_END - $BUILD_START))
-echo -e "$Yellow Build completed in $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds.$nocol"
+if [[ "${EXPORT}" == "yes" ]]; then
+	rm -rf ${ZIP_EXPORT}
+	mkdir ${ZIP_EXPORT}
+	cp ${ZIP_LOCATION} ${ZIP_EXPORT}
+fi
+
+cd ${HOME}
+
+# End the script
+newLine; echoText "${BUILD_RESULT_STRING}!"; newLine
+
+DATE_END=$(date +"%s")
+DIFF=$((${DATE_END} - ${DATE_START}))
+
+echo -e ${RED}"SCRIPT DURATION: $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS"
+if [[ "${BUILD_RESULT_STRING}" == "BUILD SUCCESSFUL" ]]; then
+   	if [[ "${EXPORT}" == "yes" ]]; then
+		echo -e "ZIP LOCATION: ${ZIP_EXPORT_LOCATION}"
+		echo -e "SIZE: $( du -h ${ZIP_EXPORT_LOCATION} | awk '{print $1}' )"
+	else
+   		echo -e "ZIP LOCATION: ${ZIP_LOCATION}"
+   		echo -e "SIZE: $( du -h ${ZIP_LOCATION} | awk '{print $1}' )"
+	fi
+fi
+echo -e ${RESTORE}
