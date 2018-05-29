@@ -86,7 +86,7 @@ if [[ `ls ${ZIMAGE_DIR}/${KERNEL} 2>/dev/null | wc -l` != "0" ]]; then
 
 
    # Make the zip file
-   newLine; echoText "MAKING FLASHABLE ZIP"; newLine
+   echo "MAKING FLASHABLE ZIP"
 
    cp -vr ${ZIMAGE_DIR}/${KERNEL} ${ANYKERNEL_DIR}/zImage
    cd ${ANYKERNEL_DIR}
@@ -110,7 +110,7 @@ fi
 cd ${HOME}
 
 # End the script
-newLine; echoText "${BUILD_RESULT_STRING}!"; newLine
+echo "${BUILD_RESULT_STRING}!"
 
 DATE_END=$(date +"%s")
 DIFF=$((${DATE_END} - ${DATE_START}))
