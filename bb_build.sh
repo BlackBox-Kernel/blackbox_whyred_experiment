@@ -76,18 +76,18 @@ echo "          Cooking BlackBox        "
 echo -e "***********************************************$nocol"
 
 make -j$(nproc --all) O=out ARCH=arm64 \
-					  CC="/root/platform_prebuilts_clang_host_linux-x86/clang-4053586/bin/clang" \
+		      CC="/root/platform_prebuilts_clang_host_linux-x86/clang-4053586/bin/clang" \
                       CLANG_TRIPLE="aarch64-linux-gnu-"
 
 # If the above was successful
-if [KERN_IMG]; then
+if [ -a $KERN_IMG]; then
    BUILD_RESULT_STRING="BUILD SUCCESSFUL"
 
 
    # Make the zip file
    echo "MAKING FLASHABLE ZIP"
 
-   cp -vr ${ZIMAGE_DIR}/${KERNEL} ${ANYKERNEL_DIR}/zImage
+   cp -vr ${KERN_IMG} ${ANYKERNEL_DIR}/zImage
    cd ${ANYKERNEL_DIR}
    zip -r9 ${ZIP_NAME}.zip * -x README ${ZIP_NAME}.zip
 
