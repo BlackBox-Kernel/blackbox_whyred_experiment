@@ -15,6 +15,10 @@
 # Init Script
 KERNEL_DIR=$PWD
 ZIMAGE=$KERNEL_DIR/arch/arm/boot/zImage
+KERNEL="Image.gz-dtb"
+KERN_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb
+BASE_VER="BlackBox"
+VER="-v1.0-$(date +"%Y-%m-%d"-%H%M)-"
 BUILD_START=$(date +"%s")
 
 # Color Code Script
@@ -33,34 +37,47 @@ export ARCH=arm64
 export SUBARCH=arm64
 export KBUILD_BUILD_USER="KunalKene1797"
 export KBUILD_BUILD_HOST="PhantomBlack"
-export CROSS_COMPILE="/home/kunalkene1797/arm-eabi-6.0/bin/arm-eabi-"
+export CROSS_COMPILE="/root/aarch64-linux-android-4.9/bin/aarch64-linux-android-"
 
 # Compilation Scripts Are Below
-compile_kernel ()
-{
-echo -e "$White***********************************************"
-echo "         Compiling BlackBox Kernel             "
+echo -e "${green}"
+echo "--------------------------------------------------------"
+echo "      Initializing build to compile Ver: $VER    "
+echo "--------------------------------------------------------"
+
+echo -e "$yellow***********************************************"
+echo "         Creating Output Directory: out      "
 echo -e "***********************************************$nocol"
-make clean && make mrproper
-make whyred-perf_defconfig
-make -j4
+
+mkdir -p out
+
+echo -e "$red***********************************************"
+echo "          Cleaning Up Before Compile          "
+echo -e "***********************************************$nocol"
+
+make O=out clean 
+make O=out mrproper
+
+echo -e "$yellow***********************************************"
+echo "          Initialising DEFCONFIG        "
+echo -e "***********************************************$nocol"
+
+make O=out ARCH=arm64 whyred-perf_defconfig
+
+echo -e "$yellow***********************************************"
+echo "          Cooking BlackBox        "
+echo -e "***********************************************$nocol"
+
+make -j$(nproc --all) O=out ARCH=arm64
+
 if ! [ -a $ZIMAGE ];
 then
 echo -e "$Red Kernel Compilation failed! Fix the errors! $nocol"
 exit 1
 fi
-}
 
-# Finalizing Script Below
-case $1 in
-clean)
-make ARCH=arm64 -j4 clean mrproper
-rm -rf include/linux/autoconf.h
-;;
-*)
-compile_kernel
-;;
-esac
+
+#BUILD TIME
 BUILD_END=$(date +"%s")
 DIFF=$(($BUILD_END - $BUILD_START))
 echo -e "$Yellow Build completed in $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds.$nocol"
